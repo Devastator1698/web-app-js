@@ -10,27 +10,53 @@
 <h1>Система учёта обращений клиентов</h1>
 
 <section>
-  <h2>Создание обращения</h2>
-  <p>Форма для создания обращения будет реализована в следующих лабораторных работах.</p>
-</section>
-
-<section>
+    <div id="message" class="message"></div>
   <h2>Список обращений</h2>
 
-  <div class="controls">
+ <div class="controls">
     <button id="btnAll">Показать все</button>
     <button id="btnNew">Показать NEW</button>
     <button id="btnSort">Сортировать по value ↓</button>
     <button id="btnStats">Показать статистику</button>
+    <button id="btnLoad">Загрузить данные</button>
   </div>
+   <div id="list"></div>
+</section>
+<section>
+  <h3>Создание обращения</h3>
+  <form id="recordForm">
+    <input
+      id="titleInput"
+      name="title"
+      placeholder="Название обращения"
+    />
+    <input
+      id="valueInput"
+      name="value"
+      placeholder="Value (0–1000000)"
+    />
+    <input
+      id="createdAtInput"
+      name="createdAt"
+      placeholder="YYYY-MM-DD"
+    />
+    <select id="statusInput" name="status">
+      <option value="new">new</option>
+      <option value="in_progress">in_progress</option>
+      <option value="done">done</option>
+    </select>
+    <button type="submit">Сохранить</button>
+  </form>
+
+  <div id="formErrors" class="message"></div>
 
   <div id="message" class="message"></div>
 
-  <div id="list"></div>
 </section>
 
 <script src="data.js"></script>
 <script src="logic.js"></script>
 <script src="script.js"></script>
+<script src="api.js"></script>
 </body>
 </html>

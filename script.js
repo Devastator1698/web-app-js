@@ -247,11 +247,19 @@ console.log(newCount);
 // Ссылки на DOM
 const listEl = document.getElementById("list");
 const messageEl = document.getElementById("message");
+const formEl = document.getElementById("recordForm");
+const formErrorsEl = document.getElementById("formErrors");
+
+const titleInput = document.getElementById("titleInput");
+const valueInput = document.getElementById("valueInput");
+const createdAtInput = document.getElementById("createdAtInput");
+const statusInput = document.getElementById("statusInput");
 
 const btnAll = document.getElementById("btnAll");
 const btnNew = document.getElementById("btnNew");
 const btnSort = document.getElementById("btnSort");
 const btnStats = document.getElementById("btnStats");
+const btnLoad = document.getElementById("btnLoad");
 
 // Функция отрисовки списка обращений
 function renderList(itemsToRender) {
@@ -321,6 +329,41 @@ btnStats.addEventListener("click", function () {
     "Количество status=\"new\": " + stats.newCount;
 });
 
+// Кнопка загрузки данных из внешнего сервиса
+btnLoad.addEventListener("click", async function () {
+  messageEl.textContent = "Загрузка данных...";
+  const url = "https://jsonplaceholder.typicode.com/todos?_limit=3";
+
+  const result = await safeFetchJson(url);
+
+  if (!result.ok) {
+    messageEl.textContent = "Ошибка загрузки: " + result.error;
+    console.log("safeFetchJson details:", result.details);
+    return;
+  }
+
+  const todos = result.data; // массив
+
+  for (let i = 0; i < todos.length; i++) {
+    const todo = todos[i];
+
+    const newId = getNextId(requests);
+
+    const newRecord = {
+      id: newId,
+      title: normalizeSpaces(String(todo.title)),
+      value: todo.id, // просто число из внешних данных
+      status: todo.completed ? "done" : "new",
+      createdAt: "2026-04-01"
+    };
+
+    requests.push(newRecord);
+  }
+
+  renderList(requests);
+  messageEl.textContent = "Данные из внешнего сервиса загружены и добавлены.";
+});
+
 // Обработчик для кнопок удаления
 listEl.addEventListener("click", function(event) {
   if (event.target.dataset.action === "remove") {
@@ -329,6 +372,52 @@ listEl.addEventListener("click", function(event) {
     renderList(requests);
     messageEl.textContent = "Обращение удалено.";
   }
+});
+// Вспомогательная функция для вывода ошибок формы
+function showFormErrors(errors) {
+  if (errors.length === 0) {
+    formErrorsEl.textContent = "";
+    return;
+  }
+  formErrorsEl.textContent = errors.join("\n");
+}
+
+// Обработчик отправки формы
+formEl.addEventListener("submit", function (event) {
+  event.preventDefault();
+
+  const raw = {
+    title: titleInput.value,
+    value: valueInput.value,
+    createdAt: createdAtInput.value,
+    status: statusInput.value
+  };
+
+  const record = buildRecordFromForm(raw);
+  const errors = collectErrors(record);
+
+  if (errors.length > 0) {
+    showFormErrors(errors);
+    messageEl.textContent = "Исправьте ошибки формы.";
+    return;
+  }
+
+  showFormErrors([]);
+  const newId = getNextId(requests);
+
+  const newRecord = {
+    id: newId,
+    title: record.title,
+    value: record.value,
+    status: record.status,
+    createdAt: record.createdAt
+  };
+
+  requests.push(newRecord);
+  renderList(requests);
+
+  formEl.reset();
+  messageEl.textContent = "Обращение добавлено (id=" + newId + ").";
 });
 
 // Первичная отрисовка
