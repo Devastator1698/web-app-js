@@ -126,3 +126,118 @@ for (let i = 0; i < requests.length; i++) {
 }
 
 console.log(newCount);
+
+// Элементы страницы
+const btnAll = document.getElementById("btnAll");
+const btnNew = document.getElementById("btnNew");
+const btnStats = document.getElementById("btnStats");
+const output = document.getElementById("output");
+
+// Функция для форматирования текста
+function formatRequest(request) {
+  let text = "";
+  text += "ID: " + request.id + "\n";
+  text += "Заголовок: " + request.title + "\n";
+  text += "Статус: " + request.status + "\n";
+  text += "Value: " + request.value + "\n";
+  text += "Создано: " + request.createdAt + "\n";
+  return text;
+}
+
+// Кнопка "Показать все обращения"
+btnAll.addEventListener("click", function () {
+  let text = "";
+  text += appConfig.appTitle + "\n";
+  text += "Всего обращений: " + requests.length + "\n\n";
+
+  for (let i = 0; i < requests.length; i++) {
+    const r = requests[i];
+    text += formatRequest(r) + "\n";
+  }
+
+  output.textContent = text;
+  actionCount = actionCount + 1;
+  console.log("Действие: показать все, actionCount =", actionCount);
+});
+
+// Кнопка "Показать только new"
+btnNew.addEventListener("click", function () {
+  let text = "";
+  let newCount = 0;
+
+  for (let i = 0; i < requests.length; i++) {
+    const r = requests[i];
+    if (r.status === "new") {
+      newCount = newCount + 1;
+      text += formatRequest(r) + "\n";
+    }
+  }
+
+  if (newCount === 0) {
+    output.textContent = "Нет обращений со статусом NEW.";
+  } else {
+    output.textContent = "Обращения со статусом NEW: " + newCount + "\n\n" + text;
+  }
+
+  actionCount = actionCount + 1;
+  console.log("Действие: показать NEW, actionCount =", actionCount);
+});
+
+// Кнопка "Показать статистику"
+btnStats.addEventListener("click", function () {
+  // порог фильтрации как строка (по заданию 2.3)
+  const inputMinValue = String(appConfig.minValueForFilter);
+  const minValue = Number(inputMinValue);
+
+  if (Number.isNaN(minValue)) {
+    output.textContent = "Ошибка: порог фильтрации задан некорректно.";
+    return;
+  }
+
+  let sum = 0;
+  let maxValue = 0;
+  let newCount = 0;
+  let filteredText = "";
+  let filteredCount = 0;
+
+  for (let i = 0; i < requests.length; i++) {
+    const r = requests[i];
+
+    // сумма
+    sum = sum + r.value;
+
+    // максимум
+    if (r.value > maxValue) {
+      maxValue = r.value;
+    }
+
+    // количество NEW
+    if (r.status === "new") {
+      newCount = newCount + 1;
+    }
+
+    // фильтр по minValue
+    if (r.value >= minValue) {
+      filteredCount = filteredCount + 1;
+      filteredText += formatRequest(r) + "\n";
+    }
+  }
+
+  let text = "";
+  text += appConfig.appTitle + "\n\n";
+  text += "Всего обращений: " + requests.length + "\n";
+  text += "Сумма value: " + sum + "\n";
+  text += "Максимальное value: " + maxValue + "\n";
+  text += "Количество status=\"new\": " + newCount + "\n";
+  text += "Порог фильтрации (minValue): " + minValue + "\n";
+  text += "Количество записей с value >= minValue: " + filteredCount + "\n\n";
+
+  if (filteredCount > 0) {
+    text += "Записи, прошедшие фильтр:\n\n";
+    text += filteredText;
+  }
+
+  output.textContent = text;
+  actionCount = actionCount + 1;
+  console.log("Действие: показать статистику, actionCount =", actionCount);
+});
